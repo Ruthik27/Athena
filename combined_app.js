@@ -6,6 +6,7 @@ var express = require('express');
 var app = express();
 var cors = require('cors');
 var cookieParser = require('cookie-parser');
+var increment = 0;
 
 
 
