@@ -108,6 +108,25 @@ app.post('/register', function(req, res) {
   });
 });
 
+app.post('/course', function(req, res) {
+  var sid = 811010436;
+  var courseID = req.body.courseID[increment];
+  var grade = 70;
+  increment++;
+
+  console.log('Received registration details:', req.body);
+
+  var query = 'INSERT INTO enrollment (sid, course_ID, grade) VALUES (?, ?, ?)';
+  pool.query(query, [sid, courseID, grade], function(error, results, fields) {
+    if (error) {
+      console.error('An error occurred:', error);
+      res.status(500).send('An error occurred during registration.');
+      return;
+    }
+    console.log('Query executed successfully, results:', results);
+    res.send('Registration successful.');  });
+});
+
 // Login endpoint (serving the login.html file)
 app.get('/login', function(req, res) {
   res.sendFile(__dirname + '/client/src/login/login.html'); // Update the path as needed
