@@ -17,8 +17,8 @@ function run() {
             const connection = mysql.createConnection({
                 host: 'localhost',
                 user: 'root',
-                password: '',
-                database: 'athena'
+                password: '8888',
+                database: 'athena_schema'
             });
 
             let query = 'INSERT INTO courses (course_Name, course_ID, course_Hours, professor_ID) VALUES ?';

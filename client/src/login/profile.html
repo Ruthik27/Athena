@@ -17,12 +17,10 @@
         text-align: center;
       }
       #profile-info {
-        /* If you changed to ID, use this selector */
-        text-align: center; /* Center the text within the div */
-        margin: auto; /* Center the div itself */
-        max-width: 400px; /* You can adjust this value */
+        text-align: center;
+        margin: auto;
+        max-width: 400px;
       }
-      /* ... other styles ... */
     </style>
   </head>
 
@@ -43,13 +41,12 @@
       <section class="tab-content" id="profile">
         <h2>Profile</h2>
         <div id="profile-info">
-          <!-- Change this line from class to id -->
-          <p><strong>Name:</strong> XYZ</p>
-          <p><strong>SID:</strong> 811837785</p>
-          <p><strong>Major:</strong> Business Management</p>
-          <p><strong>Age:</strong> 20</p>
+          <p><strong>Name:</strong> Harry</p>
+          <p><strong>SID:</strong> 123456789</p>
+          <p><strong>Major:</strong> Computer Science</p>
+          <p><strong>Age:</strong> 22</p>
           <p><strong>Gender:</strong> Male</p>
-          <p><strong>Advisor:</strong> John</p>
+          <p><strong>Advisor:</strong> Harry</p>
         </div>
         <table id="coursesTable">
           <tbody>
@@ -64,33 +61,21 @@
       </section>
     </main>
     <script>
-      fetch("http://localhost:3006/profile")
-        .then((response) => response.json())
-        .then((data) => {
-          const profileInfoDiv = document.getElementById("profile-info");
-          profileInfoDiv.innerHTML = `
-      <p><strong>Name:</strong> ${data.profile.stu_name}</p>
-      <p><strong>SID:</strong> ${data.profile.sid}</p>
-      <p><strong>Major:</strong> ${data.profile.major}</p>
-      <p><strong>Age:</strong> ${data.profile.age}</p>
-      <p><strong>Gender:</strong> ${data.profile.gender}</p>
-    `;
-
-          // You can also update the course details here using data.courses
-        })
-        .catch((error) => {
-          console.error("Error fetching profile:", error);
-        });
-    </script>
-
-    <script>
-      // Function to fetch course details and populate the table
-      function fetchCourses() {
+      function fetchProfileAndCourses() {
         fetch("/profile")
           .then((response) => response.json())
           .then((data) => {
-            console.log("Server response:", data); // Log the server response
-            const courses = data.courses; // Extract the courses from the response
+            const profileInfoDiv = document.getElementById("profile-info");
+            profileInfoDiv.innerHTML = `
+            <p><strong>Name:</strong> ${data.profile.stu_name}</p>
+            <p><strong>SID:</strong> ${data.profile.sid}</p>
+            <p><strong>Major:</strong> ${data.profile.major}</p>
+            <p><strong>Age:</strong> ${data.profile.age}</p>
+            <p><strong>Gender:</strong> ${data.profile.gender}</p>
+          `;
+
+            // Update course details
+            const courses = data.courses;
             const table = document
               .getElementById("coursesTable")
               .getElementsByTagName("tbody")[0];
@@ -109,15 +94,12 @@
             });
           })
           .catch((error) => {
-            console.error(
-              "An error occurred while fetching course details:",
-              error
-            );
+            console.error("Error fetching profile and courses:", error);
           });
       }
 
-      // Call the function to fetch course details on page load
-      window.onload = fetchCourses;
+      // Call the function to fetch profile and course details on page load
+      window.onload = fetchProfileAndCourses;
     </script>
   </body>
 </html>

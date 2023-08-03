@@ -111,28 +111,6 @@ app.post('/register', function(req, res) {
   });
 });
 
-var increment = 0
-
-app.post('/course', function(req, res) {
-  var sid = 123456789;
-
-  var courseID = req.body.courseID[increment];
-  var grade = 70;
-  increment++;
-
-  console.log('Received registration details:', req.body);
-
-  var query = 'INSERT INTO enrollment (sid, course_ID, grade) VALUES (?, ?, ?)';
-  pool.query(query, [sid, courseID, grade], function(error, results, fields) {
-    if (error) {
-      console.error('An error occurred:', error);
-      res.status(500).send('An error occurred during registration.');
-      return;
-    }
-    console.log('Query executed successfully, results:', results);
-    res.send('Registration successful.');  });
-});
-
 // Login endpoint (serving the login.html file)
 app.get('/login', function(req, res) {
   res.sendFile(__dirname + '/client/src/login/login.html'); // Update the path as needed
@@ -205,26 +183,17 @@ app.get('/profile', (req, res) => {
     if (err) throw err;
 
     // Query to fetch enrollment data for the student
-    const enrollment_sql = 'SELECT course_ID FROM enrollment WHERE sid = ?';
-    pool.query(enrollment_sql, [sid], (err, enrollment_result) => {
+  const enrollment_sql = 'SELECT course_ID FROM enrollment WHERE sid = ?';
+  pool.query(enrollment_sql, [sid], (err, enrollment_result) => {
+    if (err) throw err;
+
+    // Extract course IDs from the enrollment result
+    const course_ids = enrollment_result.map(enrollment => enrollment.course_ID);
+
+    // Fetch course details by joining with the courses and professors tables
+    const course_sql = 'SELECT courses.course_Name, courses.course_Hours, courses.course_ID, professors.professor_Name FROM courses JOIN professors ON courses.professor_ID = professors.professor_ID WHERE courses.course_ID IN (?)';
+    pool.query(course_sql, [course_ids], (err, course_result) => {
       if (err) throw err;
-
-      // Extract course IDs from the enrollment result
-      const course_ids = enrollment_result.map(enrollment => enrollment.course_ID);
-
-      // If there are no course IDs, return the profile result without course details
-      if (course_ids.length === 0) {
-        res.json({
-          profile: profile_result[0],
-          courses: []
-        });
-        return;
-      }
-
-      // Fetch course details by joining with the courses and professors tables
-      const course_sql = 'SELECT courses.course_Name, courses.course_Hours, courses.course_ID, professors.professor_Name FROM courses JOIN professors ON courses.professor_ID = professors.professor_ID WHERE courses.course_ID IN (?)';
-      pool.query(course_sql, [course_ids], (err, course_result) => {
-        if (err) throw err;
 
         // Combine profile and course details into a single object
         const response = {
@@ -239,24 +208,7 @@ app.get('/profile', (req, res) => {
   });
 });
 
-// Endpoint to add a course
-app.post('/addCourse', (req, res) => {
-  // Extract course details from the request body
-  const { course_Name, course_Hours, course_ID, professor_ID } = req.body;
 
-  // Prepare the SQL query
-  const sql = 'INSERT INTO courses (course_Name, course_ID, course_Hours, professor_ID) VALUES (?, ?, ?, ?)';
-
-  // Execute the query
-  pool.query(sql, [course_Name, course_ID, course_Hours, professor_ID], (error, results) => {
-    if (error) {
-      console.error('Error inserting course:', error);
-      res.status(500).json({ success: false });
-      return;
-    }
-    res.json({ success: true });
-  });
-});
 
 
 

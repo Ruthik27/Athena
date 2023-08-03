@@ -3,8 +3,8 @@ const mysql = require("mysql");
 
 const hostname = "localhost",
     username = "root",
-    password = "",
-    dbname = "athena";
+    password = "8888",
+    dbname = "athena_schema";
   
 let con = mysql.createConnection({
     host: hostname,
