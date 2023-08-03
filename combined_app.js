@@ -208,6 +208,28 @@ app.get('/profile', (req, res) => {
   });
 });
 
+app.use(express.json());
+
+
+// Endpoint to add a course
+app.post('/addCourse', (req, res) => {
+  // Extract course details from the request body
+  const { course_Name, course_Hours, course_ID, professor_ID } = req.body;
+
+  // Prepare the SQL query
+  const sql = 'INSERT INTO courses (course_Name, course_ID, course_Hours, professor_ID) VALUES (?, ?, ?, ?)';
+
+  // Execute the query
+  pool.query(sql, [course_Name, course_ID, course_Hours, professor_ID], (error, results) => {
+    if (error) {
+      console.error('Error inserting course:', error);
+      res.status(500).json({ success: false });
+      return;
+    }
+    res.json({ success: true });
+  });
+});
+
 
 
 

@@ -44,13 +44,15 @@
               <th>Add Course</th>
             </tr>
             <tr>
-              <td><input type="text" id="courseName" name="courseName" /></td>
               <td>
-                <input type="number" id="courseHours" name="courseHours" />
+                <input type="text" class="courseName" name="courseName" />
               </td>
-              <td><input type="text" id="courseId" name="courseId" /></td>
               <td>
-                <select id="professorName" name="professorName">
+                <input type="number" class="courseHours" name="courseHours" />
+              </td>
+              <td><input type="text" class="courseId" name="courseId" /></td>
+              <td>
+                <select class="professorName" name="professorName">
                   <option>Karen Aguar</option>
                   <option>mariana Andrade</option>
                   <option>Robert Bostrom</option>
@@ -65,11 +67,50 @@
                   <option>Natassja Hatcher</option>
                 </select>
               </td>
-              <td><button type="button" id="addCourse">Add</button></td>
+              <td><button type="button" class="addCourse">Add</button></td>
             </tr>
           </tbody>
         </table>
       </section>
     </main>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // Add click event listener to all "Add" buttons
+        document.querySelectorAll(".addCourse").forEach(function (button) {
+          button.addEventListener("click", function () {
+            // Get the corresponding row
+            const row = button.closest("tr");
+
+            // Extract course details
+            const course_Name = row.querySelector(".courseName").value;
+            const course_Hours = row.querySelector(".courseHours").value;
+            const course_ID = row.querySelector(".courseId").value;
+            const professor_ID = row.querySelector(".professorName").value;
+
+            // Send details to the server
+            fetch("/addCourse", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                course_Name,
+                course_Hours,
+                course_ID,
+                professor_ID,
+              }),
+            })
+              .then((response) => response.json())
+              .then((data) => {
+                if (data.success) {
+                  alert("Course added successfully!");
+                  location.reload(); // Refresh the page
+                } else {
+                  alert("Failed to add course. Please try again.");
+                }
+              })
+              .catch((error) => console.error("Error:", error));
+          });
+        });
+      });
+    </script>
   </body>
 </html>
