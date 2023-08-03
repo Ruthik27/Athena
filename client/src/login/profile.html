@@ -1,10 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <title>Profile and Courses</title>
     <link rel="stylesheet" href="edit.css" />
+    <style>
+      table {
+        border-collapse: collapse;
+        margin: auto;
+      }
+      th,
+      td {
+        border: 1px solid black;
+        padding: 15px;
+        text-align: center;
+      }
+      #profile-info {
+        /* If you changed to ID, use this selector */
+        text-align: center; /* Center the text within the div */
+        margin: auto; /* Center the div itself */
+        max-width: 400px; /* You can adjust this value */
+      }
+      /* ... other styles ... */
+    </style>
   </head>
 
   <body>
@@ -21,9 +40,10 @@
     </header>
 
     <main>
-      <section id="profile" class="tab-content">
+      <section class="tab-content" id="profile">
         <h2>Profile</h2>
-        <div class="profile-info">
+        <div id="profile-info">
+          <!-- Change this line from class to id -->
           <p><strong>Name:</strong> XYZ</p>
           <p><strong>SID:</strong> 811837785</p>
           <p><strong>Major:</strong> Business Management</p>
@@ -31,7 +51,73 @@
           <p><strong>Gender:</strong> Male</p>
           <p><strong>Advisor:</strong> John</p>
         </div>
+        <table id="coursesTable">
+          <tbody>
+            <tr>
+              <th>Course Name</th>
+              <th>Course Hours</th>
+              <th>Course ID</th>
+              <th>Professor Name</th>
+            </tr>
+          </tbody>
+        </table>
       </section>
     </main>
+    <script>
+      fetch("http://localhost:3006/profile")
+        .then((response) => response.json())
+        .then((data) => {
+          const profileInfoDiv = document.getElementById("profile-info");
+          profileInfoDiv.innerHTML = `
+      <p><strong>Name:</strong> ${data.profile.stu_name}</p>
+      <p><strong>SID:</strong> ${data.profile.sid}</p>
+      <p><strong>Major:</strong> ${data.profile.major}</p>
+      <p><strong>Age:</strong> ${data.profile.age}</p>
+      <p><strong>Gender:</strong> ${data.profile.gender}</p>
+    `;
+
+          // You can also update the course details here using data.courses
+        })
+        .catch((error) => {
+          console.error("Error fetching profile:", error);
+        });
+    </script>
+
+    <script>
+      // Function to fetch course details and populate the table
+      function fetchCourses() {
+        fetch("/profile")
+          .then((response) => response.json())
+          .then((data) => {
+            console.log("Server response:", data); // Log the server response
+            const courses = data.courses; // Extract the courses from the response
+            const table = document
+              .getElementById("coursesTable")
+              .getElementsByTagName("tbody")[0];
+
+            // Clear any existing rows (except headers)
+            table.innerHTML =
+              "<tr><th>Course Name</th><th>Course Hours</th><th>Course ID</th><th>Professor Name</th></tr>";
+
+            // Add rows for each course
+            courses.forEach((course) => {
+              const row = table.insertRow();
+              row.insertCell(0).innerText = course.course_Name;
+              row.insertCell(1).innerText = course.course_Hours;
+              row.insertCell(2).innerText = course.course_ID;
+              row.insertCell(3).innerText = course.professor_Name;
+            });
+          })
+          .catch((error) => {
+            console.error(
+              "An error occurred while fetching course details:",
+              error
+            );
+          });
+      }
+
+      // Call the function to fetch course details on page load
+      window.onload = fetchCourses;
+    </script>
   </body>
 </html>

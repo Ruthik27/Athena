@@ -5,6 +5,8 @@ var cheerio = require('cheerio');
 var express = require('express');
 var app = express();
 var cors = require('cors');
+var cookieParser = require('cookie-parser');
+
 
 // Serve static files from the "public" directory
 
@@ -60,7 +62,8 @@ app.get('/', function(req, res) {
 });
 
 
-
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
 // Serve static files from the client/src/login directory
 app.use(express.static(__dirname + '/client/src/login'));
@@ -112,3 +115,100 @@ app.post('/register', function(req, res) {
 app.get('/login', function(req, res) {
   res.sendFile(__dirname + '/client/src/login/login.html'); // Update the path as needed
 });
+
+
+app.post('/login', function(req, res) {
+  var sid = req.body.sid;
+  var password = req.body.password;
+
+  // Check for admin credentials
+  if (sid === "000000000" && password === "admin") {
+    res.json({ success: true, redirectUrl: './admin.html' }); // Redirect to the admin page
+    return;
+  }
+
+  var numericSid = parseInt(sid);
+  if (isNaN(numericSid)) {
+    res.status(400).json({ success: false, message: 'Student ID must be a number.' });
+    return;
+  }
+
+  // Query the database to get the hashed password associated with the sid
+  pool.query('SELECT password FROM students WHERE sid = ?', [numericSid], function(error, results, fields) {
+    if (error || results.length === 0) {
+      res.status(500).json({ success: false, message: 'An error occurred during login or user not found.' });
+      return;
+    }
+
+    // Fetch the hashed password from the query results
+    var hashedPassword = results[0].password;
+
+    // Use bcrypt to compare the entered password with the hashed password
+    bcrypt.compare(password, hashedPassword, function(err, result) {
+      if (err) {
+        res.status(500).json({ success: false, message: 'An error occurred during password verification.' });
+        return;
+      }
+
+      // If the passwords match, redirect to the profile page
+      if (result) {
+        res.json({ success: true, redirectUrl: '/profile.html' });
+      } else {
+        res.status(401).json({ success: false, message: 'Wrong password!' }); // Pop up error saying wrong password
+      }
+    });
+  });
+});
+
+app.use(cookieParser());
+
+
+
+
+app.get('/profile/:sid', (req, res) => {
+  const sid = req.params.sid;
+  const sql = 'SELECT stu_name, sid, major, age, gender FROM students WHERE sid = ?';
+  pool.query(sql, [sid], (err, result) => {
+    if (err) throw err;
+    res.json(result[0]);
+  });
+});
+
+app.get('/profile', (req, res) => {
+  const sid = req.cookies.sid; // Retrieve SID from the cookie
+
+  // Query to fetch profile data for the student
+  const profile_sql = 'SELECT stu_name, sid, major, age, gender FROM students WHERE sid = ?';
+  pool.query(profile_sql, [sid], (err, profile_result) => {
+    if (err) throw err;
+
+    // Query to fetch enrollment data for the student
+  const enrollment_sql = 'SELECT course_ID FROM enrollment WHERE sid = ?';
+  pool.query(enrollment_sql, [sid], (err, enrollment_result) => {
+    if (err) throw err;
+
+    // Extract course IDs from the enrollment result
+    const course_ids = enrollment_result.map(enrollment => enrollment.course_ID);
+
+    // Fetch course details by joining with the courses and professors tables
+    const course_sql = 'SELECT courses.course_Name, courses.course_Hours, courses.course_ID, professors.professor_Name FROM courses JOIN professors ON courses.professor_ID = professors.professor_ID WHERE courses.course_ID IN (?)';
+    pool.query(course_sql, [course_ids], (err, course_result) => {
+      if (err) throw err;
+
+        // Combine profile and course details into a single object
+        const response = {
+          profile: profile_result[0],
+          courses: course_result
+        };
+
+        // Send the combined details to the frontend
+        res.json(response);
+      });
+    });
+  });
+});
+
+
+
+
+

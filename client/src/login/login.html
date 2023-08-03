@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-qidth, intital scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Athena 0.5 Login</title>
     <style>
       * {
@@ -59,29 +59,25 @@
   </head>
   <body>
     <div class="container">
-      <form action="">
+      <form action="/login" method="post">
         <h1>Athena 0.5</h1>
         <div class="form-group">
-          <label for="">Username</label>
-          <input type="text" class="form-control" required />
+          <label for="sid">Student ID</label>
+          <input type="text" name="sid" class="form-control" required />
         </div>
         <div class="form-group">
-          <label for="">Password</label>
-          <input type="password" class="form-control" required />
+          <label for="password">Password</label>
+          <input
+            type="password"
+            name="password"
+            class="form-control"
+            required
+          />
         </div>
-        <input type="submit" class="btn" value="Login" />
+        <button type="submit" value="Login">Login</button>
         <p>Don't have an Account?</p>
-        <input
-          type="submit"
-          class="btn1"
-          value="Create an Account"
-          onClick="registerCng()"
-        />
-        <script>
-          function registerCng() {
-            window.location.href = "./register.html";
-          }
-        </script>
+
+        <!-- Additional content if needed -->
       </form>
       <script>
         window.onload = function () {
@@ -95,14 +91,31 @@
         const loginForm = document.querySelector("form");
 
         loginForm.addEventListener("submit", (e) => {
-          e.preventDefault();
+          e.preventDefault(); // Preventing default submission
+
+          // Gathering form data
           const lform = new FormData(loginForm);
           const loginObj = Object.fromEntries(lform);
-          const loginjson = JSON.stringify(loginObj);
-          localStorage.setItem("loginform", loginjson);
-          const updatejson = localStorage.getItem("registerform");
-          const updateobj = JSON.parse(updatejson);
-          update.updateStu(updateobj);
+
+          // Sending a POST request to the /login endpoint
+          fetch("/login", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(loginObj),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.success) {
+                window.location.href = data.redirectUrl; // Redirecting if login is successful
+              } else {
+                alert(data.message); // Showing an error message if login fails
+              }
+            })
+            .catch((error) => {
+              console.error("An error occurred:", error);
+            });
         });
       </script>
     </div>
