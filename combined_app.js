@@ -160,6 +160,25 @@ app.post('/login', function(req, res) {
   });
 });
 
+app.post('/course', function(req, res) {
+  var sid = 811010436;
+  var courseID = req.body.courseID[increment];
+  var grade = 70;
+  increment++;
+
+  console.log('Received registration details:', req.body);
+
+  var query = 'INSERT INTO enrollment (sid, course_ID, grade) VALUES (?, ?, ?)';
+  pool.query(query, [sid, courseID, grade], function(error, results, fields) {
+    if (error) {
+      console.error('An error occurred:', error);
+      res.status(500).send('An error occurred during registration.');
+      return;
+    }
+    console.log('Query executed successfully, results:', results);
+    res.send('Registration successful.');  });
+});
+
 app.use(cookieParser());
 
 
@@ -205,28 +224,6 @@ app.get('/profile', (req, res) => {
         res.json(response);
       });
     });
-  });
-});
-
-app.use(express.json());
-
-
-// Endpoint to add a course
-app.post('/addCourse', (req, res) => {
-  // Extract course details from the request body
-  const { course_Name, course_Hours, course_ID, professor_ID } = req.body;
-
-  // Prepare the SQL query
-  const sql = 'INSERT INTO courses (course_Name, course_ID, course_Hours, professor_ID) VALUES (?, ?, ?, ?)';
-
-  // Execute the query
-  pool.query(sql, [course_Name, course_ID, course_Hours, professor_ID], (error, results) => {
-    if (error) {
-      console.error('Error inserting course:', error);
-      res.status(500).json({ success: false });
-      return;
-    }
-    res.json({ success: true });
   });
 });
 
