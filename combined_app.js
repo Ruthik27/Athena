@@ -8,7 +8,7 @@ var cors = require('cors');
 var cookieParser = require('cookie-parser');
 
 
-// Serve static files from the "public" directory
+
 
 
 // Connect to the MySQL server
@@ -105,15 +105,15 @@ app.post('/register', function(req, res) {
         return;
       }
 
-      // Redirect to the login page with the success parameter
+     
       res.redirect('/login?success=true');
     });
   });
 });
 
-// Login endpoint (serving the login.html file)
+
 app.get('/login', function(req, res) {
-  res.sendFile(__dirname + '/client/src/login/login.html'); // Update the path as needed
+  res.sendFile(__dirname + '/client/src/login/login.html'); 
 });
 
 
@@ -123,7 +123,7 @@ app.post('/login', function(req, res) {
 
   // Check for admin credentials
   if (sid === "000000000" && password === "admin") {
-    res.json({ success: true, redirectUrl: './admin.html' }); // Redirect to the admin page
+    res.json({ success: true, redirectUrl: './admin.html' }); 
     return;
   }
 
@@ -154,7 +154,7 @@ app.post('/login', function(req, res) {
       if (result) {
         res.json({ success: true, redirectUrl: '/profile.html' });
       } else {
-        res.status(401).json({ success: false, message: 'Wrong password!' }); // Pop up error saying wrong password
+        res.status(401).json({ success: false, message: 'Wrong password!' }); 
       }
     });
   });
@@ -220,7 +220,7 @@ app.get('/profile', (req, res) => {
           courses: course_result
         };
 
-        // Send the combined details to the frontend
+        
         res.json(response);
       });
     });
