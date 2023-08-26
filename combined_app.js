@@ -3,7 +3,16 @@ var fs = require('fs');
 var mysql = require('mysql');
 var cheerio = require('cheerio');
 var express = require('express');
+var session = require('express-session');
 var app = express();
+app.set('view engine', 'ejs');
+
+app.use(session({
+    secret: 'your_secret_key',
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: false }  // Change to true if using HTTPS
+}));
 var cors = require('cors');
 var cookieParser = require('cookie-parser');
 
@@ -114,7 +123,7 @@ app.post('/register', function(req, res) {
 var increment = 0
 
 app.post('/course', function(req, res) {
-  var sid = 123456789;
+  var sid = req.session.sid;
 
   var courseID = req.body.courseID[increment];
   var grade = 70;
@@ -140,7 +149,11 @@ app.get('/login', function(req, res) {
 
 
 app.post('/login', function(req, res) {
-  var sid = req.body.sid;
+
+    // Assuming 'sid' contains the logged-in student's ID after login is verified
+    // Storing sid in the session upon successful login
+    var sid = req.body.sid;
+    req.session.sid = sid;
   var password = req.body.password;
 
   // Check for admin credentials
@@ -196,46 +209,56 @@ app.get('/profile/:sid', (req, res) => {
   });
 });
 
+// Endpoint to fetch both profile and courses for the logged-in student
 app.get('/profile', (req, res) => {
-  const sid = req.cookies.sid; // Retrieve SID from the cookie
+  // Fetch sid from the session
+  const sid = req.session.sid;
 
-  // Query to fetch profile data for the student
+  // First, fetch the profile details
   const profile_sql = 'SELECT stu_name, sid, major, age, gender FROM students WHERE sid = ?';
   pool.query(profile_sql, [sid], (err, profile_result) => {
-    if (err) throw err;
-
-    // Query to fetch enrollment data for the student
-    const enrollment_sql = 'SELECT course_ID FROM enrollment WHERE sid = ?';
-    pool.query(enrollment_sql, [sid], (err, enrollment_result) => {
-      if (err) throw err;
-
-      // Extract course IDs from the enrollment result
-      const course_ids = enrollment_result.map(enrollment => enrollment.course_ID);
-
-      // If there are no course IDs, return the profile result without course details
-      if (course_ids.length === 0) {
-        res.json({
-          profile: profile_result[0],
-          courses: []
-        });
-        return;
+      if (err) {
+          res.status(500).json({ success: false, message: 'An error occurred while fetching profile data.' });
+          return;
       }
 
-      // Fetch course details by joining with the courses and professors tables
-      const course_sql = 'SELECT courses.course_Name, courses.course_Hours, courses.course_ID, professors.professor_Name FROM courses JOIN professors ON courses.professor_ID = professors.professor_ID WHERE courses.course_ID IN (?)';
-      pool.query(course_sql, [course_ids], (err, course_result) => {
-        if (err) throw err;
+      // Next, fetch the courses the student has registered for
+      const courses_sql = 'SELECT courses.course_Name, courses.course_Hours, courses.course_ID, courses.professor_ID FROM enrollment JOIN courses ON enrollment.course_ID = courses.course_ID WHERE enrollment.sid = ?';
+      pool.query(courses_sql, [sid], (err, courses_result) => {
+          if (err) {
+              res.status(500).json({ success: false, message: 'An error occurred while fetching courses data.' });
+              return;
+          }
 
-        // Combine profile and course details into a single object
-        const response = {
-          profile: profile_result[0],
-          courses: course_result
-        };
+          // Render the profile.html page with both profile data and courses data
+          fs.readFile('./client/src/login/profile.html', 'utf8', function(readErr, contents) {
+              if (readErr) {
+                  res.status(500).send('Error reading profile page.');
+                  return;
+              }
 
-        // Send the combined details to the frontend
-        res.json(response);
+              // Replace profile placeholders
+              let renderedHtml = contents.replace('{NAME}', profile_result[0].stu_name)
+                                         .replace('{SID}', profile_result[0].sid)
+                                         .replace('{MAJOR}', profile_result[0].major)
+                                         .replace('{AGE}', profile_result[0].age)
+                                         .replace('{GENDER}', profile_result[0].gender);
+
+              // Replace courses table placeholders
+              let courses_table_rows = '';
+              for (const course of courses_result) {
+                  courses_table_rows += `<tr>
+                      <td>${course.course_Name}</td>
+                      <td>${course.course_Hours}</td>
+                      <td>${course.course_ID}</td>
+                      <td>${course.professor_name}</td>
+                  </tr>`;
+              }
+              renderedHtml = renderedHtml.replace('{COURSES}', courses_table_rows);
+
+              res.send(renderedHtml);
+          });
       });
-    });
   });
 });
 
@@ -260,3 +283,37 @@ app.post('/addCourse', (req, res) => {
 
 
 
+
+// Profile route to display student details
+app.get('/profile', function(req, res) {
+    var sid = req.session.sid;  // Retrieve sid from the session
+
+    // Fetch student data from the database using the sid
+    var query = 'SELECT * FROM students WHERE sid = ?';
+    pool.query(query, [sid], function(error, results, fields) {
+        if (error) {
+            console.error('An error occurred:', error);
+            res.status(500).send('An error occurred fetching student data.');
+        } else {
+            // Render the profile page with the fetched data
+            res.render('profile', { student: results[0] });
+        }
+    });
+});
+
+// Route to fetch student data and send it as JSON
+app.get('/profile-data', function(req, res) {
+    var sid = req.session.sid;  // Retrieve sid from the session
+
+    // Fetch student data from the database using the sid
+    var query = 'SELECT * FROM athena_schema.students WHERE sid = ?';
+    pool.query(query, [sid], function(error, results, fields) {
+        if (error) {
+            console.error('An error occurred:', error);
+            res.status(500).send('An error occurred fetching student data.');
+        } else {
+            // Send the fetched data as JSON
+            res.json(results[0]);
+        }
+    });
+});

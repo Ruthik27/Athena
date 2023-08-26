@@ -1,55 +1,127 @@
 <!DOCTYPE html>
+
 <html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <title>Profile and Courses</title>
-    <link rel="stylesheet" href="edit.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600&amp;display=swap"
+      rel="stylesheet"
+    />
     <style>
-      table {
-        border-collapse: collapse;
-        margin: auto;
+      body {
+        font-family: "Open Sans", sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f5f5f5;
       }
+
+      header {
+        background-color: #007bff;
+        padding: 10px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: white;
+      }
+
+      nav ul {
+        list-style-type: none;
+        padding: 0;
+      }
+
+      nav ul li {
+        display: inline;
+        margin-right: 20px;
+      }
+
+      nav ul li a {
+        color: white;
+        text-decoration: none;
+      }
+
+      main {
+        padding: 20px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+      }
+
       th,
       td {
-        border: 1px solid black;
+        border: 1px solid #e0e0e0;
         padding: 15px;
         text-align: center;
       }
+
+      th {
+        background-color: #007bff;
+        color: white;
+      }
+
       #profile-info {
         text-align: center;
         margin: auto;
         max-width: 400px;
+        background-color: #ffffff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+      }
+
+      .back-button {
+        margin-top: 20px;
+        padding: 10px 20px;
+        background-color: #28a745;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        font-size: 16px;
+        width: 100%;
+        max-width: 200px;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .back-button:hover {
+        background-color: #218838;
       }
     </style>
   </head>
-
   <body>
+    <h2>Profile Details</h2>
+    <p><strong>Name:</strong> {NAME}</p>
+    <p><strong>SID:</strong> {SID}</p>
+    <p><strong>Major:</strong> {MAJOR}</p>
+    <p><strong>Age:</strong> {AGE}</p>
+    <p><strong>Gender:</strong> {GENDER}</p>
+
     <header>
       <div class="logo">
-        <img src="./logo.jpg" alt="Organization Logo" />
+        <img alt="Organization Logo" src="./logo.jpg" style="max-width: 50px" />
       </div>
       <nav>
         <ul>
-          <li><a href="./profile.html">Profile</a></li>
+          <li><a href="./profile.ejs">Profile</a></li>
           <li><a href="./course.html">Courses</a></li>
         </ul>
       </nav>
     </header>
-
     <main>
-      <section class="tab-content" id="profile">
+      <section id="profile">
         <h2>Profile</h2>
-        <div id="profile-info">
-          <p><strong>Name:</strong> Harry</p>
-          <p><strong>SID:</strong> 123456789</p>
-          <p><strong>Major:</strong> Computer Science</p>
-          <p><strong>Age:</strong> 22</p>
-          <p><strong>Gender:</strong> Male</p>
-          <p><strong>Advisor:</strong> Harry</p>
-        </div>
+
         <table id="coursesTable">
           <tbody>
+            {COURSES}
             <tr>
               <th>Course Name</th>
               <th>Course Hours</th>
@@ -58,48 +130,15 @@
             </tr>
           </tbody>
         </table>
+        <button
+          class="back-button"
+          onclick="window.location.href='login.html'"
+          type="button"
+        >
+          Back to Login
+        </button>
       </section>
     </main>
-    <script>
-      function fetchProfileAndCourses() {
-        fetch("/profile")
-          .then((response) => response.json())
-          .then((data) => {
-            const profileInfoDiv = document.getElementById("profile-info");
-            profileInfoDiv.innerHTML = `
-            <p><strong>Name:</strong> ${data.profile.stu_name}</p>
-            <p><strong>SID:</strong> ${data.profile.sid}</p>
-            <p><strong>Major:</strong> ${data.profile.major}</p>
-            <p><strong>Age:</strong> ${data.profile.age}</p>
-            <p><strong>Gender:</strong> ${data.profile.gender}</p>
-          `;
-
-            // Update course details
-            const courses = data.courses;
-            const table = document
-              .getElementById("coursesTable")
-              .getElementsByTagName("tbody")[0];
-
-            // Clear any existing rows (except headers)
-            table.innerHTML =
-              "<tr><th>Course Name</th><th>Course Hours</th><th>Course ID</th><th>Professor Name</th></tr>";
-
-            // Add rows for each course
-            courses.forEach((course) => {
-              const row = table.insertRow();
-              row.insertCell(0).innerText = course.course_Name;
-              row.insertCell(1).innerText = course.course_Hours;
-              row.insertCell(2).innerText = course.course_ID;
-              row.insertCell(3).innerText = course.professor_Name;
-            });
-          })
-          .catch((error) => {
-            console.error("Error fetching profile and courses:", error);
-          });
-      }
-
-      // Call the function to fetch profile and course details on page load
-      window.onload = fetchProfileAndCourses;
-    </script>
+    <!-- The provided JavaScript remains unchanged -->
   </body>
 </html>

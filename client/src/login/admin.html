@@ -4,25 +4,100 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Courses</title>
-    <link rel="stylesheet" href="edit.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600&display=swap"
+      rel="stylesheet"
+    />
     <style>
-      table {
-        border-collapse: collapse;
-        margin: auto;
+      body {
+        font-family: "Open Sans", sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f5f5f5;
       }
+
+      header {
+        background-color: #007bff;
+        padding: 10px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: white;
+      }
+
+      nav ul {
+        list-style-type: none;
+        padding: 0;
+      }
+
+      nav ul li {
+        display: inline;
+        margin-right: 20px;
+      }
+
+      nav ul li a {
+        color: white;
+        text-decoration: none;
+      }
+
+      main {
+        padding: 20px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+      }
+
       th,
       td {
-        border: 1px solid black;
+        border: 1px solid #e0e0e0;
         padding: 15px;
         text-align: center;
       }
+
+      th {
+        background-color: #007bff;
+        color: white;
+      }
+
+      input,
+      select {
+        padding: 10px;
+        border: 1px solid #e0e0e0;
+        border-radius: 4px;
+        width: 100%;
+        font-size: 16px;
+      }
+
+      button {
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+
+      button:hover {
+        background-color: #0056b3;
+      }
+
+      .back-button {
+        margin-top: 20px;
+      }
+
+      .back-button:hover {
+        background-color: #0056b3;
+      }
     </style>
   </head>
-
   <body>
     <header>
       <div class="logo">
-        <img src="./logo.jpg" alt="Organization Logo" />
+        <img src="./logo.jpg" alt="Organization Logo" style="max-width: 50px" />
       </div>
       <nav>
         <ul>
@@ -71,8 +146,16 @@
             </tr>
           </tbody>
         </table>
+        <button
+          type="button"
+          class="back-button"
+          onclick="window.location.href='login.html'"
+        >
+          Back to Login
+        </button>
       </section>
     </main>
+    <!-- The provided JavaScript remains unchanged -->
     <script>
       document.addEventListener("DOMContentLoaded", function () {
         // Add click event listener to all "Add" buttons

@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Profile and Courses</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: "Open Sans", sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f5f5f5;
+      }
+
+      header {
+        background-color: #007bff;
+        padding: 10px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: white;
+      }
+
+      nav ul {
+        list-style-type: none;
+        padding: 0;
+      }
+
+      nav ul li {
+        display: inline;
+        margin-right: 20px;
+      }
+
+      nav ul li a {
+        color: white;
+        text-decoration: none;
+      }
+
+      main {
+        padding: 20px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+      }
+
+      th,
+      td {
+        border: 1px solid #e0e0e0;
+        padding: 15px;
+        text-align: center;
+      }
+
+      th {
+        background-color: #007bff;
+        color: white;
+      }
+
+      #profile-info {
+        text-align: center;
+        margin: auto;
+        max-width: 400px;
+        background-color: #ffffff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+      }
+
+      .back-button {
+        margin-top: 20px;
+        padding: 10px 20px;
+        background-color: #28a745;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        font-size: 16px;
+        width: 100%;
+        max-width: 200px;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .back-button:hover {
+        background-color: #218838;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="logo">
+        <img src="./logo.jpg" alt="Organization Logo" style="max-width: 50px" />
+      </div>
+      <nav>
+        <ul>
+          <li><a href="./profile.ejs">Profile</a></li>
+          <li><a href="./course.html">Courses</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main>
+      <section id="profile">
+        <h2>Profile</h2>
+        <div id="profile-info">
+          <p><strong>Name:</strong> <%= student.stu_name %></p>
+          <p><strong>SID:</strong> <%= student.sid %></p>
+          <p><strong>Major:</strong> <%= student.major %></p>
+          <p><strong>Age:</strong> <%= student.age %></p>
+          <p><strong>Gender:</strong> <%= student.gender %></p>
+          <p>
+            <strong>Advisor:</strong> <% /* Add logic here to display the
+            advisor name */ %>
+          </p>
+          <p><strong>Name:</strong></p>
+          <p><strong>SID:</strong></p>
+          <p><strong>Major:</strong></p>
+          <p><strong>Age:</strong></p>
+          <p><strong>Gender:</strong></p>
+          <p><strong>Advisor:</strong></p>
+        </div>
+        <table id="coursesTable">
+          <tbody>
+            <tr>
+              <th>Course Name</th>
+              <th>Course Hours</th>
+              <th>Course ID</th>
+              <th>Professor Name</th>
+            </tr>
+          </tbody>
+        </table>
+        <button
+          type="button"
+          class="back-button"
+          onclick="window.location.href='login.html'"
+        >
+          Back to Login
+        </button>
+      </section>
+    </main>
+    <!-- The provided JavaScript remains unchanged -->
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // Extract the SID from the cookie
+        const sidCookie = document.cookie
+          .split("; ")
+          .find((row) => row.startsWith("sid="));
+        const sid = sidCookie ? sidCookie.split("=")[1] : null;
+        if (!sid) {
+          console.error("SID cookie is missing.");
+          return;
+        }
+
+        // Fetch the student's details using the sid
+        fetch(`/profile`)
+          .then((response) => response.json())
+          .then((data) => {
+            if (data && data.profile) {
+              // Populate the HTML elements with the student's data
+              document.querySelectorAll(
+                "#profile-info p"
+              )[0].innerHTML = `<strong>Name:</strong> ${data.profile.stu_name}`;
+              document.querySelectorAll(
+                "#profile-info p"
+              )[1].innerHTML = `<strong>SID:</strong> ${data.profile.sid}`;
+              document.querySelectorAll(
+                "#profile-info p"
+              )[2].innerHTML = `<strong>Major:</strong> ${data.profile.major}`;
+              document.querySelectorAll(
+                "#profile-info p"
+              )[3].innerHTML = `<strong>Age:</strong> ${data.profile.age}`;
+              document.querySelectorAll(
+                "#profile-info p"
+              )[4].innerHTML = `<strong>Gender:</strong> ${data.profile.gender}`;
+
+              // Update course details
+              const courses = data.courses;
+              const table = document
+                .getElementById("coursesTable")
+                .getElementsByTagName("tbody")[0];
+              // Clear any existing rows (except headers)
+              table.innerHTML =
+                "<tr><th>Course Name</th><th>Course Hours</th><th>Course ID</th><th>Professor Name</th></tr>";
+              // Add rows for each course
+              courses.forEach((course) => {
+                const row = table.insertRow();
+                row.insertCell(0).innerText = course.course_Name;
+                row.insertCell(1).innerText = course.course_Hours;
+                row.insertCell(2).innerText = course.course_ID;
+                row.insertCell(3).innerText = course.professor_Name;
+              });
+            } else {
+              console.error(
+                "Profile data is missing or has unexpected format."
+              );
+            }
+          })
+          .catch((error) => {
+            console.error("Error fetching profile data:", error);
+          });
+      });
+    </script>
+  </body>
+</html>
