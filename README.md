@@ -68,5 +68,6 @@ A robust web-based **course registration portal** offering a seamless experience
 ⚠ **Security Alert**: Always prioritize safety! Refrain from storing database credentials in the source code. Opt for environment variables or an external configuration file.
 
 ---
+## License 📜
 
-📌 Continually update this README as the application evolves to keep all stakeholders informed.
+📌 This project is licensed under the [MIT License](LICENSE)
